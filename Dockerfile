@@ -5,7 +5,7 @@
 # using version 1.4.2 with head plugin
  
 # Pull base image.
-FROM dockerfile/java
+FROM java:7u79-jre
 
 ENV ES_VERSION 1.4.2
 ENV ES_DIR /elasticsearch
@@ -25,8 +25,8 @@ RUN wget -q https://download.elasticsearch.org/elasticsearch/elasticsearch/elast
 #                                                         #
 # ------------------------------------------------------- #
 
-RUN git clone http://github.com/jpetazzo/pipework /opt/pipework
-
+RUN apt-get update && apt-get install -y git
+RUN git clone https://github.com/jpetazzo/pipework.git /opt/pipework
 
 ADD run.sh $ES_DIR/run.sh
 
