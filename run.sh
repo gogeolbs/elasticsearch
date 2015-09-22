@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Waiting for the IP assignment: elasticsearch"
-NETWORK_INTERFACE=${NETWORK_INTERFACE:='eth1'}
+NETWORK_INTERFACE=${NETWORK_INTERFACE:='eth0'}
 /opt/pipework/pipework --wait -i $NETWORK_INTERFACE
 
 if [[ -z $ES_REPLICAS ]]; then
@@ -16,8 +16,11 @@ if [[ -z $ES_CLUSTER_NAME ]]; then
 fi
 
 if [[ -z $ES_IP ]]; then
-	ES_IP=$(ifconfig eth1 | grep "inet " | grep -v "127.0.0.1/8" | awk '{print $2}' | awk '{print substr($1,6)}')
+	ES_IP=$(ifconfig $NETWORK_INTERFACE | grep "inet " | grep -v "127.0.0.1/8" | awk '{print $2}' | awk '{print substr($1,6)}')
 fi
+
+ES_DATA_DIR=${ES_DATA_DIR:=/elasticsearch}
+ES_LOG_DIR=${ES_LOG_DIR:=/elasticsearch}
 
 echo "ES_CLUSTER_NAME: $ES_CLUSTER_NAME"
 echo "ES_IP: $ES_IP"
@@ -29,7 +32,20 @@ sed -ir "s/.*index.number_of_shards.*/index.number_of_shards: $SHARDS/g" config/
 
 sed -ri "s/.*cluster.name.*/cluster.name: $ES_CLUSTER_NAME/g" config/elasticsearch.yml
 sed -ri "s/.*network.host.*/network.host: $ES_IP/g" config/elasticsearch.yml
+sed -ri "s;.*path.data.*;path.data: $ES_DATA_DIR;g" config/elasticsearch.yml
+sed -ri "s;.*path.logs.*;path.logs: $ES_LOG_DIR;g" config/elasticsearch.yml
 
 echo "http.cors.enabled: true" >> config/elasticsearch.yml
+
+if [[ -n $GCLOUD_PROJ ]] && [[ -n $GCLOUD_ZONE ]]; then
+	# Plugin to gClould Servers
+	echo "#Setup elasticsearch cloud gce plugin\n"
+	echo "cloud:" >> config/elasticsearch.yml
+	echo "  gce:" >> config/elasticsearch.yml
+	echo "      project_id: $GCLOUD_PROJ" >> config/elasticsearch.yml
+	echo "      zone: $GCLOUD_ZONE" >> config/elasticsearch.yml
+	echo "discovery:" >> config/elasticsearch.yml
+	echo "  type: gce" >> config/elasticsearch.yml
+fi
 
 /elasticsearch/bin/elasticsearch
