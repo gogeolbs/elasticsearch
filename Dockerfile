@@ -38,8 +38,8 @@ VOLUME ["/elasticsearch/data", "/logs"]
 # Define working directory.
 WORKDIR /elasticsearch
 
-RUN \
-  /elasticsearch/bin/plugin -install mobz/elasticsearch-head
+RUN /elasticsearch/bin/plugin -install mobz/elasticsearch-head
+RUN /elasticsearch/bin/plugin -install elasticsearch/elasticsearch-cloud-gce/2.4.1
 
 EXPOSE 9200 9300
 
