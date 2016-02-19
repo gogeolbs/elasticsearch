@@ -7,7 +7,7 @@
 # Pull base image.
 FROM java:7u79-jre
 
-ENV ES_VERSION 1.4.2
+ENV ES_VERSION 1.7.3
 ENV ES_DIR /elasticsearch
  
 # Install ElasticSearch.
@@ -38,8 +38,10 @@ VOLUME ["/elasticsearch/data", "/logs"]
 # Define working directory.
 WORKDIR /elasticsearch
 
-RUN /elasticsearch/bin/plugin -install mobz/elasticsearch-head
-RUN /elasticsearch/bin/plugin -install elasticsearch/elasticsearch-cloud-gce/2.4.1
+RUN \
+  /elasticsearch/bin/plugin -install mobz/elasticsearch-head
+
+RUN /elasticsearch/bin/plugin -install elasticsearch/elasticsearch-cloud-gce/2.7.0
 
 EXPOSE 9200 9300
 

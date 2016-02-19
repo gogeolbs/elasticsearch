@@ -48,4 +48,8 @@ if [[ -n $GCLOUD_PROJ ]] && [[ -n $GCLOUD_ZONE ]]; then
 	echo "  type: gce" >> config/elasticsearch.yml
 fi
 
+if [[ -n $LIST_ES ]]; then
+	sed -ri "s/.*discovery.zen.ping.unicast.hosts.*/discovery.zen.ping.unicast.hosts: [$LIST_ES]/g" config/elasticsearch.yml
+fi
+
 /elasticsearch/bin/elasticsearch
